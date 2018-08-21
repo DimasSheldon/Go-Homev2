@@ -1,0 +1,420 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cv"
+    android:layout_width="match_parent"
+    android:layout_height="68dp">
+
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="62dp"
+        android:layout_margin="10dp"
+        card_view:cardCornerRadius="4dp"
+        card_view:elevation="14dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/widget_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginRight="16dp" />
+
+            <TextView
+                android:id="@+id/widget_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toRightOf="@+id/widget_photo"
+                android:textSize="30sp" />
+
+            <TextView
+                android:id="@+id/widget_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/widget_name"
+                android:layout_toRightOf="@+id/widget_photo" />
+
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>
+
+
+....activity_main.xml
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.MainActivity">
+
+    <!-- Use DrawerLayout as root container for activity -->
+    <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <FrameLayout
+            android:id="@+id/content_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+        <!-- Container for contents of drawer - use NavigationView to make configuration easier -->
+        <android.support.design.widget.NavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:fitsSystemWindows="true"
+            app:menu="@menu/drawer_view" />
+f
+    </android.support.v4.widget.DrawerLayout>
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabGravity="fill"
+            app:tabMode="fixed" />
+    </android.support.design.widget.AppBarLayout>
+
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+</android.support.design.widget.CoordinatorLayout>
+
+
+Monitor Fragment xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:showIn="@layout/activity_main">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_monitor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:scrollbars="vertical" />
+
+</RelativeLayout>
+
+
+package sheldon.com.android.gohome.fragments;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import sheldon.com.android.gohome.R;
+import sheldon.com.android.gohome.adapters.ControlAdapter;
+import sheldon.com.android.gohome.content.WidgetControl;
+
+public class ControlFragment extends Fragment {
+    private List<WidgetControl> widgets;
+    private RecyclerView rv;
+
+    public ControlFragment() {
+        // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View rootView = inflater.inflate(R.layout.fragment_control, container, false);
+
+        rv = (RecyclerView) rootView.findViewById(R.id.rv_control);
+        rv.setHasFixedSize(true);
+
+        initializeData();
+        initializeAdapter();
+
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+        rv.setLayoutManager(llm);
+
+        return rootView;
+    }
+
+    private void initializeData() {
+        widgets = new ArrayList<>();
+        widgets.add(new WidgetControl("Kontrol-1", "OFF", 0));
+        widgets.add(new WidgetControl("Kontrol-2", "OFF", 0));
+    }
+
+    private void initializeAdapter() {
+        ControlAdapter adapter = new ControlAdapter(widgets);
+        rv.setAdapter(adapter);
+    }
+}
+
+package sheldon.com.android.gohome.adapters;
+
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Switch;
+import android.widget.TextView;
+
+import java.util.List;
+
+import sheldon.com.android.gohome.R;
+import sheldon.com.android.gohome.content.WidgetControl;
+
+public class ControlAdapter extends RecyclerView.Adapter<ControlAdapter.WidgetViewHolder> {
+
+    public static class WidgetViewHolder extends RecyclerView.ViewHolder {
+
+        CardView cv;
+        TextView widgetName;
+        TextView widgetStatus;
+        Switch widgetToggleStat;
+
+        public WidgetViewHolder(View itemView) {
+            super(itemView);
+            cv = (CardView) itemView.findViewById(R.id.cv_control);
+            widgetName = (TextView) itemView.findViewById(R.id.widget_name_control);
+            widgetStatus = (TextView) itemView.findViewById(R.id.widget_status_control);
+            widgetToggleStat = (Switch) itemView.findViewById(R.id.switch_toggle);
+        }
+    }
+
+    List<WidgetControl> widgets;
+
+    public ControlAdapter(List<WidgetControl> widgets) {
+        this.widgets = widgets;
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+    }
+
+    @Override
+    public WidgetViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        View v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_control, viewGroup, false);
+        WidgetViewHolder wvh = new WidgetViewHolder(v);
+        return wvh;
+    }
+
+    @Override
+    public void onBindViewHolder(final WidgetViewHolder widgetViewHolder, int i) {
+        widgetViewHolder.widgetName.setText(widgets.get(i).getName());
+        widgetViewHolder.widgetStatus.setText(widgets.get(i).getValue());
+        widgetViewHolder.widgetToggleStat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return widgets.size();
+    }
+}
+
+
+public static void updateData(JSONObject jsonObject) {
+        widgets.clear();
+
+        mfLabels.clear();
+        mfValues.clear();
+        icons.clear();
+        mfIcons.clear();
+        colors.clear();
+        mfColors.clear();
+        mfIconColors.clear();
+
+        assignAttributes("AI", jsonObject);
+        assignAttributes("DI", jsonObject);
+
+        for (String icon : icons) {
+            switch (icon) {
+                case "ion ion-thermometer":
+                    mfIcons.add(R.mipmap.ic_temperature_foreground);
+                    break;
+                case "ion ion-android-alert":
+//                    mfIcons.add(R.drawable.logo_white);
+                    break;
+                case "ion ion-ios-lightbulb":
+                    mfIcons.add(R.mipmap.ic_light_bulb_white_foreground);
+                    break;
+                case "ion ion-waterdrop":
+                    mfIcons.add(R.mipmap.ic_humidity_foreground);
+                    break;
+                default:
+                    mfIcons.add(R.drawable.logo_white);
+                    break;
+            }
+        }
+
+        for (String color : colors) {
+            switch (color) {
+                case "bg-red":
+                    mfColors.add(Color.parseColor("#d32f2f"));
+                    mfIconColors.add(Color.parseColor("#9a0007"));
+                    break;
+                case "bg-blue":
+                    mfColors.add(Color.parseColor("#1565c0"));
+                    mfIconColors.add(Color.parseColor("#003c8f"));
+                    break;
+                case "bg-orange":
+                    mfColors.add(Color.parseColor("#ff8f00"));
+                    mfIconColors.add(Color.parseColor("#c56000"));
+                    break;
+                default:
+                    mfColors.add(Color.GRAY);
+                    mfIconColors.add(Color.DKGRAY);
+                    break;
+            }
+        }
+
+        initializeData(mfLabels, mfValues, mfIcons, mfColors, mfIconColors);
+
+        initializeAdapterLLM();
+    }
+
+    private static void assignAttributes(String key, JSONObject jsonObject) {
+        for (int i = 0; i < jsonObject.length(); i++) {
+
+            try {
+                JSONObject attribute = jsonObject.getJSONObject(String.valueOf(i));
+
+                if (attribute.names().toString().contains(key)) {
+                    mfLabels.add(attribute.getString("label" + key));
+                    mfValues.add(attribute.getString("value" + key));
+                    icons.add(attribute.getString("icon" + key));
+                    colors.add(attribute.getString("color" + key));
+                }
+                monitorAdapter.notifyDataSetChanged();
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    private static void initializeData(ArrayList<String> labels,
+                                       ArrayList<String> status,
+                                       ArrayList<Integer> icons,
+                                       ArrayList<Integer> cvColors,
+                                       ArrayList<Integer> iconColors) {
+
+        for (int i = 0; i < labels.size(); i++) {
+            widgets.add(i, new WidgetMonitor(labels.get(i), status.get(i), icons.get(i),
+                    cvColors.get(i), iconColors.get(i)));
+            monitorAdapter.notifyItemChanged(i);
+        }
+    }
+
+    private static void initializeAdapterLLM() {
+        monitorAdapter = new MonitorAdapter(widgets);
+        rv.setAdapter(monitorAdapter);
+    }
+
+    private static void initiateEmptyWidgets() {
+        for (int i = 1; i <= 5; i++)
+            widgets.add(new WidgetMonitor("Monitoring " + String.valueOf(i), "NA", R.drawable.logo_white, Color.GRAY, Color.DKGRAY));
+        initializeAdapterLLM();
+    }
+
+     try {
+                        if (response.get(key) instanceof JSONObject) {
+                            // set data for Analog Input and Digital Input
+                            if (key.contains("AI") || key.contains("DI")) {
+                                JSONObject currData = new JSONObject(response.get(key).toString());
+
+                                if (currData.getString("status").equals("ACTIVE")) {
+                                    countUpdate++;
+                                    MonitorFragment.updateData(currData);
+                                }
+                            } else {
+                                MonitorFragment.removeUnusedWidgets();
+                                MonitorFragment.resetPosition();
+                                countUpdate = 0;
+                            }
+
+                            // set data for Digital Output
+                            if (key.contains("DO")) {
+
+                                JSONObject currData = new JSONObject(response.get(key).toString());
+
+                                if (currData.getString("status").equals("ACTIVE")) {
+                                    countUpdate++;
+                                    ControlFragment.updateData(currData);
+                                }
+                            } else {
+                                ControlFragment.resetPosition();
+                                countUpdate = 0;
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+                    <?xml version="1.0" encoding="utf-8"?>
+                    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        xmlns:tools="http://schemas.android.com/tools"
+                        android:id="@+id/fragment_monitor"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                        tools:showIn="@layout/activity_main">
+
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/rv_monitor"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clipToPadding="false"
+                            android:scrollbars="vertical" />
+
+                    </RelativeLayout>
