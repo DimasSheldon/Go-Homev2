@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,16 +17,20 @@ import java.util.ArrayList;
 
 import sheldon.com.android.gohomev2.R;
 import sheldon.com.android.gohomev2.activities.MainActivity;
+import sheldon.com.android.gohomev2.adapters.DigitalInputAdapter;
 import sheldon.com.android.gohomev2.content.WidgetMonitor;
-import sheldon.com.android.gohomev2.adapters.MonitorAdapter;
+import sheldon.com.android.gohomev2.adapters.AnalogInputAdapter;
 
 public class MonitorFragment extends Fragment {
 
-    private static MonitorAdapter monitorAdapter;
-    private static RecyclerView rv;
-    private static int position = 0;
-
-    private static ArrayList<WidgetMonitor> widgets;
+    private static AnalogInputAdapter analogInputAdapter;
+    private static DigitalInputAdapter digitalInputAdapter;
+    private static RecyclerView mRecyclerViewAI, mRecyclerViewDI;
+    private static ImageButton mExpandButtonAI, mExpandButtonDI;
+    private static int positionAI = 0;
+    private static int positionDI = 0;
+    private static ArrayList<WidgetMonitor> widgetsAI;
+    private static ArrayList<WidgetMonitor> widgetsDI;
 
     public MonitorFragment() {
     }
@@ -34,7 +39,8 @@ public class MonitorFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        widgets = new ArrayList<>();
+        widgetsAI = new ArrayList<>();
+        widgetsDI = new ArrayList<>();
     }
 
     @Override
@@ -43,45 +49,79 @@ public class MonitorFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_monitor, container, false);
 
-        rv = (RecyclerView) rootView.findViewById(R.id.rv_monitor);
-        rv.setHasFixedSize(true);
+        mRecyclerViewAI = (RecyclerView) rootView.findViewById(R.id.rv_analog_input);
+        mRecyclerViewAI.setHasFixedSize(true);
+
+        mRecyclerViewDI = (RecyclerView) rootView.findViewById(R.id.rv_digital_input);
+        mRecyclerViewDI.setHasFixedSize(true);
 
         //empty widgets
         initiateEmptyWidgets();
 
-        monitorAdapter = new MonitorAdapter(widgets);
-        rv.setAdapter(monitorAdapter);
+        analogInputAdapter = new AnalogInputAdapter(widgetsAI);
+        digitalInputAdapter = new DigitalInputAdapter(widgetsDI);
+        mRecyclerViewAI.setAdapter(analogInputAdapter);
+        mRecyclerViewDI.setAdapter(digitalInputAdapter);
 
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        rv.setLayoutManager(llm);
+        LinearLayoutManager llmAI = new LinearLayoutManager(getActivity());
+        LinearLayoutManager llmDI = new LinearLayoutManager(getActivity());
+        mRecyclerViewAI.setLayoutManager(llmAI);
+        mRecyclerViewDI.setLayoutManager(llmDI);
+
+        mExpandButtonAI = (ImageButton) rootView.findViewById(R.id.expand_button_ai);
+        mExpandButtonDI = (ImageButton) rootView.findViewById(R.id.expand_button_di);
+
+        mExpandButtonAI.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mRecyclerViewAI.getVisibility() == View.VISIBLE) {
+                    mExpandButtonAI.setImageResource(R.drawable.ic_expand_more_black_36dp);
+                    mRecyclerViewAI.setVisibility(View.GONE);
+                } else {
+                    mExpandButtonAI.setImageResource(R.drawable.ic_expand_less_black_36dp);
+                    mRecyclerViewAI.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+        mExpandButtonDI.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mRecyclerViewDI.getVisibility() == View.VISIBLE) {
+                    mExpandButtonDI.setImageResource(R.drawable.ic_expand_more_black_36dp);
+                    mRecyclerViewDI.setVisibility(View.GONE);
+                } else {
+                    mExpandButtonDI.setImageResource(R.drawable.ic_expand_less_black_36dp);
+                    mRecyclerViewDI.setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
         return rootView;
     }
 
     private static void initiateEmptyWidgets() {
-//        for (int i = 0; i < 10; i++)
-//            widgets.add(new WidgetMonitor("PLAIN_LOGO", "Monitoring" + i, "GRAY", "NA"));
-        widgets.add(new WidgetMonitor("PLAIN_LOGO", "Monitoring", "GRAY", "NA"));
+        widgetsAI.add(new WidgetMonitor("PLAIN_LOGO", "Monitoring", "GRAY", "NA"));
+        widgetsDI.add(new WidgetMonitor("PLAIN_LOGO", "Monitoring", "GRAY", "NA"));
     }
 
-    public static void updateData(JSONObject jsonObject) {
-        Log.d("POSITION_MONITOR", "updateData: " + position);
-        Log.d("WIDGET_SIZE", "updateData: " + widgets.size());
+    public static void updateDataAI(JSONObject jsonObject) {
+        Log.d("POSITION_MONITOR", "updateDataAI: " + positionAI);
+        Log.d("WIDGET_SIZE", "updateDataAI: " + widgetsAI.size());
 
-        if (!(position >= widgets.size())) {
+        if (!(positionAI >= widgetsAI.size())) {
             Log.d("MONITOR_FRAGMENT", "UPDATE");
             try {
-                widgets.get(position).setIcon(jsonObject.getString("icon"));
-                widgets.get(position).setLabel(jsonObject.getString("label"));
-                widgets.get(position).setColor(jsonObject.getString("color"));
-                widgets.get(position).setValue(jsonObject.getString("value"));
+                widgetsAI.get(positionAI).setIcon(jsonObject.getString("icon"));
+                widgetsAI.get(positionAI).setLabel(jsonObject.getString("label"));
+                widgetsAI.get(positionAI).setColor(jsonObject.getString("color"));
+                widgetsAI.get(positionAI).setValue(jsonObject.getString("value"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         } else {
             try {
                 Log.d("MONITOR_FRAGMENT", "ADD");
-                widgets.add(position, new WidgetMonitor(jsonObject.getString("icon"),
+                widgetsAI.add(positionAI, new WidgetMonitor(jsonObject.getString("icon"),
                         jsonObject.getString("label"),
                         jsonObject.getString("color"),
                         jsonObject.getString("value")));
@@ -89,21 +129,61 @@ public class MonitorFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-        monitorAdapter.notifyDataSetChanged();
+        analogInputAdapter.notifyDataSetChanged();
 
-        position++;
+        positionAI++;
+    }
+
+    public static void updateDataDI(JSONObject jsonObject) {
+        Log.d("POSITION_MONITOR", "updateDataDI: " + positionDI);
+        Log.d("WIDGET_SIZE", "updateDataDI: " + widgetsDI.size());
+
+        if (!(positionDI >= widgetsDI.size())) {
+            Log.d("MONITOR_FRAGMENT", "UPDATE");
+            try {
+                widgetsDI.get(positionDI).setIcon(jsonObject.getString("icon"));
+                widgetsDI.get(positionDI).setLabel(jsonObject.getString("label"));
+                widgetsDI.get(positionDI).setColor(jsonObject.getString("color"));
+                widgetsDI.get(positionDI).setValue(jsonObject.getString("value"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                Log.d("MONITOR_FRAGMENT", "ADD");
+                widgetsDI.add(positionDI, new WidgetMonitor(jsonObject.getString("icon"),
+                        jsonObject.getString("label"),
+                        jsonObject.getString("color"),
+                        jsonObject.getString("value")));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        digitalInputAdapter.notifyDataSetChanged();
+
+        positionDI++;
     }
 
     public static void resetPosition() {
-        position = 0;
+        positionAI = 0;
+        positionDI = 0;
     }
 
-    public static void removeUnusedWidgets() {
-        for (int i = MainActivity.countUpdateMntr; i < widgets.size(); i++) {
-            widgets.remove(i);
+    public static void removeUnusedAIWidgets() {
+        for (int i = MainActivity.countUpdateAI; i < widgetsAI.size(); i++) {
+            widgetsAI.remove(i);
         }
 
-        monitorAdapter.notifyItemRemoved(position);
-        monitorAdapter.notifyItemRangeRemoved(position, monitorAdapter.getItemCount());
+        analogInputAdapter.notifyItemRemoved(positionAI);
+        analogInputAdapter.notifyItemRangeRemoved(positionAI, analogInputAdapter.getItemCount());
+    }
+
+    public static void removeUnusedDIWidgets() {
+        for (int i = MainActivity.countUpdateDI; i < widgetsDI.size(); i++) {
+            widgetsDI.remove(i);
+        }
+
+        digitalInputAdapter.notifyItemRemoved(positionDI);
+        digitalInputAdapter.notifyItemRangeRemoved(positionDI, digitalInputAdapter.getItemCount());
     }
 }

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import sheldon.com.android.gohomev2.R;
 import sheldon.com.android.gohomev2.content.WidgetMonitor;
 
-public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.WidgetViewHolder> {
+public class AnalogInputAdapter extends RecyclerView.Adapter<AnalogInputAdapter.WidgetViewHolder> {
 
     private ArrayList<WidgetMonitor> widgets;
 
@@ -47,7 +47,7 @@ public class MonitorAdapter extends RecyclerView.Adapter<MonitorAdapter.WidgetVi
         }
     }
 
-    public MonitorAdapter(ArrayList<WidgetMonitor> widgets) {
+    public AnalogInputAdapter(ArrayList<WidgetMonitor> widgets) {
         this.widgets = widgets;
     }
 

@@ -42,8 +42,9 @@ public class MainActivity extends AppCompatActivity
     private LoopJ client;
     private Handler mHandler;
     private TextView fullName, email;
-    public static int countUpdateCtrl = 0;
-    public static int countUpdateMntr = 0;
+    public static int countUpdateDO = 0;
+    public static int countUpdateDI = 0;
+    public static int countUpdateAI = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,6 +199,14 @@ public class MainActivity extends AppCompatActivity
 
         if (response != null) {
 
+            try {
+                response.getString("area");
+                response.getString("livetime");
+                response.getString("lastupdate");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             JSONObject currData;
             Iterator<?> keys = response.keys();
 
@@ -205,31 +214,42 @@ public class MainActivity extends AppCompatActivity
                 String key = (String) keys.next();
                 try {
                     // set data for Analog Input and Digital Input
-                    if (key.contains("AI") || key.contains("DI")) {
+                    if (key.contains("AI")) {
                         currData = new JSONObject(response.get(key).toString());
 
                         if (currData.getString("status").equals("ACTIVE")) {
-                            countUpdateMntr++;
-                            MonitorFragment.updateData(currData);
+                            countUpdateAI++;
+                            MonitorFragment.updateDataAI(currData);
+                        }
+                    } else if (key.contains("DI")) {
+                        currData = new JSONObject(response.get(key).toString());
+
+                        if (currData.getString("status").equals("ACTIVE")) {
+                            countUpdateDI++;
+                            MonitorFragment.updateDataDI(currData);
+                        }
+                    } else if (key.contains("DO")) {
+                        currData = new JSONObject(response.get(key).toString());
+
+                        if (currData.getString("status").equals("ACTIVE")) {
+                            countUpdateDO++;
+                            ControlFragment.updateDataDO(currData);
                         }
                     } else {
-                        currData = new JSONObject(response.get(key).toString());
-
-                        if (currData.getString("status").equals("ACTIVE")) {
-                            countUpdateCtrl++;
-                            ControlFragment.updateData(currData);
-                        }
+                        Log.d("DATA", "updateFragment: Not Widget Attributes");
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-            MonitorFragment.removeUnusedWidgets();
-            ControlFragment.removeUnusedWidgets();
+            MonitorFragment.removeUnusedAIWidgets();
+            MonitorFragment.removeUnusedDIWidgets();
+            ControlFragment.removeUnusedD0Widgets();
             MonitorFragment.resetPosition();
             ControlFragment.resetPosition();
-            countUpdateMntr = 0;
-            countUpdateCtrl = 0;
+            countUpdateAI = 0;
+            countUpdateDI = 0;
+            countUpdateDO = 0;
         }
     }
 

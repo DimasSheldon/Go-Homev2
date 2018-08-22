@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,17 +17,17 @@ import java.util.ArrayList;
 
 import sheldon.com.android.gohomev2.R;
 import sheldon.com.android.gohomev2.activities.MainActivity;
-import sheldon.com.android.gohomev2.adapters.ControlAdapter;
+import sheldon.com.android.gohomev2.adapters.DigitalOutputAdapter;
 import sheldon.com.android.gohomev2.content.WidgetControl;
-import sheldon.com.android.gohomev2.content.WidgetMonitor;
 
 public class ControlFragment extends Fragment {
 
-    private static ControlAdapter controlAdapter;
-    private static RecyclerView rv;
-    private static int position = 0;
+    private static DigitalOutputAdapter digitalOutputAdapter;
+    private static RecyclerView mRecyclerViewDO;
+    private static ImageButton mExpandButtonDO;
+    private static int positionDO = 0;
 
-    private static ArrayList<WidgetControl> widgets;
+    private static ArrayList<WidgetControl> widgetsDO;
 
     public ControlFragment() {
     }
@@ -35,7 +36,7 @@ public class ControlFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        widgets = new ArrayList<>();
+        widgetsDO = new ArrayList<>();
     }
 
     @Override
@@ -44,42 +45,56 @@ public class ControlFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_control, container, false);
 
-        rv = (RecyclerView) rootView.findViewById(R.id.rv_control);
-        rv.setHasFixedSize(true);
 
-        //empty widgets
+        mRecyclerViewDO = (RecyclerView) rootView.findViewById(R.id.rv_control);
+        mRecyclerViewDO.setHasFixedSize(true);
+
+        //empty widgetsDO
         initiateEmptyWidgets();
 
-        controlAdapter = new ControlAdapter(widgets);
-        rv.setAdapter(controlAdapter);
+        digitalOutputAdapter = new DigitalOutputAdapter(widgetsDO);
+        mRecyclerViewDO.setAdapter(digitalOutputAdapter);
 
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        rv.setLayoutManager(llm);
+        mRecyclerViewDO.setLayoutManager(llm);
 
+        mExpandButtonDO = (ImageButton) rootView.findViewById(R.id.expand_button_do);
+        mExpandButtonDO.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mRecyclerViewDO.getVisibility() == View.VISIBLE) {
+                    mExpandButtonDO.setImageResource(R.drawable.ic_expand_more_black_36dp);
+                    mRecyclerViewDO.setVisibility(View.GONE);
+                } else {
+                    mExpandButtonDO.setImageResource(R.drawable.ic_expand_less_black_36dp);
+                    mRecyclerViewDO.setVisibility(View.VISIBLE);
+                }
+            }
+        });
         return rootView;
     }
 
     private static void initiateEmptyWidgets() {
-        widgets.add(new WidgetControl("Control", "GRAY", "NA"));
+        widgetsDO.add(new WidgetControl("Control", "GRAY", "NA"));
     }
 
-    public static void updateData(JSONObject jsonObject) {
-        Log.d("POSITION_CONTROL", "updateData: " + position);
-        Log.d("WIDGET_SIZE", "updateData: " + widgets.size());
+    public static void updateDataDO(JSONObject jsonObject) {
+        Log.d("POSITION_CONTROL", "updateDataAI: " + positionDO);
+        Log.d("WIDGET_SIZE", "updateDataAI: " + widgetsDO.size());
 
-        if (!(position >= widgets.size())) {
+        if (!(positionDO >= widgetsDO.size())) {
             Log.d("CONTROL_FRAGMENT", "UPDATE");
             try {
-                widgets.get(position).setLabel(jsonObject.getString("label"));
-                widgets.get(position).setColor(jsonObject.getString("color"));
-                widgets.get(position).setValue(jsonObject.getString("value"));
+                widgetsDO.get(positionDO).setLabel(jsonObject.getString("label"));
+                widgetsDO.get(positionDO).setColor(jsonObject.getString("color"));
+                widgetsDO.get(positionDO).setValue(jsonObject.getString("value"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         } else {
             try {
                 Log.d("CONTROL_FRAGMENT", "ADD");
-                widgets.add(position, new WidgetControl(jsonObject.getString("label"),
+                widgetsDO.add(positionDO, new WidgetControl(jsonObject.getString("label"),
                         jsonObject.getString("color"),
                         jsonObject.getString("value")));
             } catch (JSONException e) {
@@ -87,21 +102,21 @@ public class ControlFragment extends Fragment {
             }
         }
 
-        controlAdapter.notifyDataSetChanged();
+        digitalOutputAdapter.notifyDataSetChanged();
 
-        position++;
+        positionDO++;
     }
 
     public static void resetPosition() {
-        position = 0;
+        positionDO = 0;
     }
 
-    public static void removeUnusedWidgets() {
-        for (int i = MainActivity.countUpdateCtrl; i < widgets.size(); i++) {
-            widgets.remove(i);
+    public static void removeUnusedD0Widgets() {
+        for (int i = MainActivity.countUpdateDO; i < widgetsDO.size(); i++) {
+            widgetsDO.remove(i);
         }
 
-        controlAdapter.notifyItemRemoved(position);
-        controlAdapter.notifyItemRangeRemoved(position, controlAdapter.getItemCount());
+        digitalOutputAdapter.notifyItemRemoved(positionDO);
+        digitalOutputAdapter.notifyItemRangeRemoved(positionDO, digitalOutputAdapter.getItemCount());
     }
 }
